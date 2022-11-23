@@ -1,3 +1,10 @@
+//first line wrap entire script in a self-executing anonymous function to move to local variable scope
+(function(){
+
+    //pseudo global variables
+    var attrArray = ['maxTemp', 'minTemp', 'averageTemp', 'precipitation', 'elevation']
+    var expressed = attrArray[0];     //initial attribute
+    
 //begin script when window loads
 window.onload = setMap();
 
@@ -44,11 +51,13 @@ function setMap() {
 
         console.log(csvData);
         console.log(nc);
+        console.log('hello1');
 
         //translate topoJSONs
-        var ncCounties = topojson.feature(nc, nc.objects.ncCounties),     //assign variable names to the features in the topojson data
+        var ncCounties = topojson.feature(nc, nc.objects.ncCounties), //assign variable names to the features in the topojson data
             stateOutlines = topojson.feature(states, states.objects.stateOutlines).features; //get array of features to pass to .data()
-        console.log(ncCounties);
+
+        console.log('hello2');
 
         //variables for data join
         var attrArray = ['maxTemp', 'minTemp', 'averageTemp', 'precipitation', 'elevation' ];
@@ -72,10 +81,11 @@ function setMap() {
                         var val = parseFloat(csvRegion[attr]);    //get csv attribute float value
                         geojsonProps[attr] = val;      //assign attribute and value to geojson properties
                     });
-                }]
+                };
             };
         };
-
+        console.log('hello3');
+        console.log(ncCounties);
 
         //add states to map using path generator. creates single svg element for states
         var otherStates = map.append('path')
@@ -112,3 +122,4 @@ function setMap() {
        .attr('d', path);
 
 };
+})();

@@ -63,5 +63,17 @@ function setMap() {
                 return d.properties.NAME_ALT;
             })
             .attr("d", path);
+
+        // create graticule generator
+        var graticule = d3.geoGraticule()
+            .step([5,5]);
+
+        // draw graticule lines
+        var gratLines= map.selectAll('.gratLines')
+            .data(graticule.lines())
+            .enter()
+            .append('path')
+            .attr("class", 'gratLines')
+            .attr('d', path);
     }
 };

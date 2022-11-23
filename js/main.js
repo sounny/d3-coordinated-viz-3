@@ -42,10 +42,39 @@ function setMap() {
         nc = data[1];
         states = data[2];
 
+        console.log(csvData);
+        console.log(nc);
+
         //translate topoJSONs
         var ncCounties = topojson.feature(nc, nc.objects.ncCounties),     //assign variable names to the features in the topojson data
             stateOutlines = topojson.feature(states, states.objects.stateOutlines).features; //get array of features to pass to .data()
         console.log(ncCounties);
+
+        //variables for data join
+        var attrArray = ['maxTemp', 'minTemp', 'averageTemp', 'precipitation', 'elevation' ];
+
+        // loop through csv file to assign csv values to geojson counties
+        for (var i=0; i<csvData.length; i++){
+            var csvCounty = csvData[i];           //properties of current csv record
+            var csvKey = csvCounty.NAME_ALT;      //primary key of csv
+
+            //loop through geojson counties to find correct county
+            for (var a=0; a<ncCounties.length; a++){
+
+                var geojsonProps = ncCounties[a].properties;  //properties of the selected county
+                var geojsonKey = geojsonProps.NAME_ALT;       //primary key of the geojson
+
+                //where primary keys match, transfer csv data to geojson properties object
+                if (geojsonKey == csvKey){
+
+                    //assign attributes and values. join csv data to spatial data
+                    attrArr.forEach(function(attr){
+                        var val = parseFloat(csvRegion[attr]);    //get csv attribute float value
+                        geojsonProps[attr] = val;      //assign attribute and value to geojson properties
+                    });
+                }]
+            };
+        };
 
 
         //add states to map using path generator. creates single svg element for states

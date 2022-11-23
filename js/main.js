@@ -1,10 +1,10 @@
 //first line wrap entire script in a self-executing anonymous function to move to local variable scope
 (function(){
 
-    //pseudo global variables
-    var attrArray = ['maxTemp', 'minTemp', 'averageTemp', 'precipitation', 'elevation']
-    var expressed = attrArray[0];     //initial attribute
-    
+//pseudo global variables
+var attrArray = ['maxTemp', 'minTemp', 'averageTemp', 'precipitation', 'elevation']
+var expressed = attrArray[0];     //initial attribute
+
 //begin script when window loads
 window.onload = setMap();
 
@@ -41,6 +41,7 @@ function setMap() {
     promises.push(d3.json('data/backgroundStates.topojson'));  //load background spatial data
     promises.push(d3.json('data/nc_counties.topojson'));  //load choropleth spatial data
     Promise.all(promises).then(callback);
+
     //console.log(promises);
 
     function callback(data) {
@@ -54,39 +55,11 @@ function setMap() {
         console.log('hello1');
 
         //translate topoJSONs
-        var ncCounties = topojson.feature(nc, nc.objects.ncCounties), //assign variable names to the features in the topojson data
-            stateOutlines = topojson.feature(states, states.objects.stateOutlines).features; //get array of features to pass to .data()
+        var stateOutlines = topojson.feature(states, states.objects.stateOutlines),   //get array of features to pass to .data()
+            ncCounties = topojson.feature(nc, nc.objects.ncCounties).features;        //assign variable names to the features in the topojson data
+
 
         console.log('hello2');
-
-        //variables for data join
-        var attrArray = ['maxTemp', 'minTemp', 'averageTemp', 'precipitation', 'elevation' ];
-
-        // loop through csv file to assign csv values to geojson counties
-        for (var i=0; i<csvData.length; i++){
-            var csvCounty = csvData[i];           //properties of current csv record
-            var csvKey = csvCounty.NAME_ALT;      //primary key of csv
-
-            //loop through geojson counties to find correct county
-            for (var a=0; a<ncCounties.length; a++){
-
-                var geojsonProps = ncCounties[a].properties;  //properties of the selected county
-                var geojsonKey = geojsonProps.NAME_ALT;       //primary key of the geojson
-
-                //where primary keys match, transfer csv data to geojson properties object
-                if (geojsonKey == csvKey){
-
-                    //assign attributes and values. join csv data to spatial data
-                    attrArr.forEach(function(attr){
-                        var val = parseFloat(csvRegion[attr]);    //get csv attribute float value
-                        geojsonProps[attr] = val;      //assign attribute and value to geojson properties
-                    });
-                };
-            };
-        };
-        console.log('hello3');
-        console.log(ncCounties);
-
         //add states to map using path generator. creates single svg element for states
         var otherStates = map.append('path')
             .datum(stateOutlines)
@@ -102,24 +75,57 @@ function setMap() {
                 return d.properties.NAME_ALT;
             })
             .attr("d", path);
-    }
+    };
 
-    // create graticule generator
-    var graticule = d3.geoGraticule()
-        .step([5,5]);  //step for 5 degrees lon, lat grat lines
 
-   var gratBack = map.append('path')  //append background to map using outline method
-       .datum(graticule.outline())
-       .attr('class', 'gratBack')     //class for css styling
-       .attr('d',path)     //project graticule
+function joinData(ncCounties, csvData) {
 
-   // draw graticule lines
-   var gratLines= map.selectAll('.gratLines')
-       .data(graticule.lines())
-       .enter()
-       .append('path')
-       .attr("class", 'gratLines')
-       .attr('d', path);
+    //variables for data join
+    var attrArray = ['maxTemp', 'minTemp', 'averageTemp', 'precipitation', 'elevation'];
 
+    // loop through csv file to assign csv values to geojson counties
+    for (var i = 0; i < csvData.length; i++) {
+        var csvCounty = csvData[i];           //properties of current csv record
+        var csvKey = csvCounty.NAME_ALT;      //primary key of csv
+
+        //loop through geojson counties to find correct county
+        for (var a = 0; a < ncCounties.length; a++) {
+
+            var geojsonProps = ncCounties[a].properties;  //properties of the selected county
+            var geojsonKey = geojsonProps.NAME_ALT;       //primary key of the geojson
+
+            //where primary keys match, transfer csv data to geojson properties object
+            if (geojsonKey == csvKey) {
+
+                //assign attributes and values. join csv data to spatial data
+                attrArr.forEach(function (attr) {
+                    var val = parseFloat(csvRegion[attr]);    //get csv attribute float value
+                    geojsonProps[attr] = val;      //assign attribute and value to geojson properties
+                });
+            };
+        };
+    };
 };
+
+console.log('hello3');
+console.log(ncCounties);
+
+
+function setGraticule(map, path) {
+    var graticule = d3.geoGraticule()        // create graticule generator
+        .step([5, 5]);  //step for 5 degrees lon, lat grat lines
+
+    var gratBack = map.append('path')  //append background to map using outline method
+        .datum(graticule.outline())
+        .attr('class', 'gratBack')     //class for css styling
+        .attr('d', path)     //project graticule
+
+    // draw graticule lines
+    var gratLines = map.selectAll('.gratLines')
+        .data(graticule.lines())
+        .enter()
+        .append('path')
+        .attr("class", 'gratLines')
+        .attr('d', path);
+    };
 })();

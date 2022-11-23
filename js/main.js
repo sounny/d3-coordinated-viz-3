@@ -45,7 +45,7 @@ function setMap() {
         //translate topoJSONs
         var ncCounties = topojson.feature(nc, nc.objects.ncCounties),     //assign variable names to the features in the topojson data
             stateOutlines = topojson.feature(states, states.objects.stateOutlines).features; //get array of features to pass to .data()
-       console.log(ncCounties);
+        console.log(ncCounties);
 
 
         //add states to map using path generator. creates single svg element for states
@@ -63,17 +63,23 @@ function setMap() {
                 return d.properties.NAME_ALT;
             })
             .attr("d", path);
-
-        // create graticule generator
-        var graticule = d3.geoGraticule()
-            .step([5,5]);
-
-        // draw graticule lines
-        var gratLines= map.selectAll('.gratLines')
-            .data(graticule.lines())
-            .enter()
-            .append('path')
-            .attr("class", 'gratLines')
-            .attr('d', path);
     }
+
+    // create graticule generator
+    var graticule = d3.geoGraticule()
+        .step([5,5]);  //step for 5 degrees lon, lat grat lines
+
+   var gratBack = map.append('path')  //append background to map using outline method
+       .datum(graticule.outline())
+       .attr('class', 'gratBack')     //class for css styling
+       .attr('d',path)     //project graticule
+
+   // draw graticule lines
+   var gratLines= map.selectAll('.gratLines')
+       .data(graticule.lines())
+       .enter()
+       .append('path')
+       .attr("class", 'gratLines')
+       .attr('d', path);
+
 };

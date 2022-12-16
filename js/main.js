@@ -21,13 +21,16 @@
             .attr('width', width)
             .attr('height', height);
 
-        //create Albers equal area conic projection centered on North Carolina
-        var projection = d3.geoAlbers()
-            .center([1.2, 35.3])
-            .rotate([81, 0, 0])
-            .parallels([29.5, 45.5])
-            .scale(7000)
-            .translate([width / 2, height / 2]);
+        // //create Albers equal area conic projection centered on North Carolina
+        // var projection = d3.geoAlbers()
+        //     .center([-79, 35.3])
+        //     .rotate([0, 0, 0])
+        //     .parallels([20, 60])
+        //     .scale(2500)
+        //     .translate([width / 2, height / 2]);
+
+        var projection = d3.geoAlbersUsa()
+            .scale(1050);
 
         //create path generator
         var path = d3.geoPath()
@@ -49,15 +52,19 @@
 
             console.log(csvData);
             console.log(nc);
+            console.log(states);
             console.log('hello1');
 
-            setGraticule(map, path);  //add graticule to map
+            // setGraticule(map, path);  //add graticule to map
 
             //translate topoJSONs
-            var stateOutlines = topojson.feature(states, states.objects.stateOutlines),   //get array of features to pass to .data()
-                ncCounties = topojson.feature(nc, nc.objects.ncCounties).features;        //assign variable names to the features in the topojson data
+            var stateOutlines = topojson.feature(states, states.objects.nc_counties).features;   //get array of features to pass to .data()
+            var ncCounties = topojson.feature(nc, nc.objects.nc_counties).features;        //assign variable names to the features in the topojson data
 
             console.log('hello2');
+            console.log(ncCounties);
+            console.log(stateOutlines);
+
 
             //add states to map using path generator. creates single svg element for states
             var otherStates = map.append('path')
@@ -67,6 +74,8 @@
 
             //join csv dat to enumeration units with function
             ncCounties = joinData(ncCounties, csvData);
+
+            var colorScale = makeColorScale(csvData);
 
             //add enumeration units to map with function
             setEnumerationUnits(ncCounties, map,path, colorScale);
@@ -97,9 +106,6 @@
 
         return colorScale;
     };
-
-
-
 
         function joinData(ncCounties, csvData) {
 
